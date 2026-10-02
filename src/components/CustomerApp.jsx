@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { calculateConfidence } from '../utils/riskScore';
+import { calculateConfidence, sanitizeInput } from '../utils/riskScore';
 import { ShoppingCart, Search, MapPin, Sparkles, X, CheckCircle, Trash2, Plus, Minus, Filter } from 'lucide-react';
 
 export default function CustomerApp({ data }) {
@@ -163,7 +163,9 @@ export default function CustomerApp({ data }) {
         <div className="flex-gap" style={{alignItems: 'center'}}>
           <div style={{position: 'relative', flex: 1, maxWidth: '850px'}}>
             <Search size={28} style={{position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)'}} />
-            <input type="text" placeholder="Search 120+ items (e.g., Amul, Dolo)..." value={search} onChange={e => setSearch(e.target.value)} 
+            <input type="text" placeholder="Search 120+ items (e.g., Amul, Dolo)..." value={search} onChange={e => setSearch(sanitizeInput(e.target.value))} 
+            aria-label="Search products"
+            role="searchbox"
               style={{margin: 0, padding: '1.5rem 1.5rem 1.5rem 4.5rem', fontSize: '1.3rem', borderRadius: '999px', background: 'var(--bg-dark)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.05)'}} />
           </div>
           

@@ -34,7 +34,10 @@ export default function App() {
 
   return (
     <div className="container">
-      <header className="flex-between" style={{marginBottom: '3rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--border)'}}>
+      {/* Skip-to-content link for keyboard / screen-reader users */}
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+
+      <header role="banner" className="flex-between" style={{marginBottom: '3rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--border)'}}>
         <div className="flex-gap">
           <div style={{background: 'linear-gradient(135deg, var(--primary), #a855f7)', padding: '0.6rem', borderRadius: '0.75rem', boxShadow: '0 0 20px rgba(168, 85, 247, 0.3)'}}>
             <NovaLogo />
@@ -48,7 +51,7 @@ export default function App() {
         </div>
         
         {/* Modern Segmented Tab Control */}
-        <div style={{background: 'var(--surface)', padding: '0.35rem', borderRadius: '0.75rem', display: 'flex', gap: '0.25rem', border: '1px solid var(--border)', backdropFilter: 'blur(10px)'}}>
+        <nav role="navigation" aria-label="Main navigation" style={{background: 'var(--surface)', padding: '0.35rem', borderRadius: '0.75rem', display: 'flex', gap: '0.25rem', border: '1px solid var(--border)', backdropFilter: 'blur(10px)'}}>
           <button 
             onClick={() => setActiveTab('customer')} 
             style={{
@@ -87,10 +90,10 @@ export default function App() {
             }}>
             <LineChart size={18} color={activeTab === 'sim' ? 'var(--primary)' : 'currentColor'} /> Business Impact & Sim
           </button>
-        </div>
+        </nav>
       </header>
 
-      <main>
+      <main id="main-content" role="main">
         {activeTab === 'customer' && <CustomerApp data={data} />}
         {activeTab === 'sim' && <BusinessImpact data={data} />}
         {activeTab === 'store' && (
