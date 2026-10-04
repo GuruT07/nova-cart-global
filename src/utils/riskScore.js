@@ -1,48 +1,57 @@
+import {
+  RISK_LOW_THRESHOLD,
+  RISK_MEDIUM_THRESHOLD,
+  WEIGHT_CANCEL_RATE,
+  WEIGHT_STALENESS,
+  WEIGHT_VELOCITY,
+  MAX_STALENESS_HOURS,
+  CANCEL_RATE_NORMALISE,
+  MAX_RATING,
+  MIN_RATING,
+  RATING_VARIANCE_MODULO,
+  RATING_VARIANCE_SCALE,
+  MAX_SEARCH_LENGTH,
+} from './constants';
+
 /**
- * Nova Cart Global — Probabilistic Trust Engine
- * Core algorithm for calculating inventory confidence.
- *
- * @param {number} lastUpdatedHours - Hours since last stock update
- * @param {number} storeCancelRate  - Store's historical cancellation rate (0–1)
- * @param {number} salesSpeed       - Items sold per hour
- * @param {number} statedStock      - Quantity in database
- * @returns {'High'|'Medium'|'Low'} - Confidence tier
+ * Calculate inventory confidence for a single SKU at a given store.
+ * @param {number} lastUpdatedHours
+ * @param {number} storeCancelRate  (0–1)
+ * @param {number} salesSpeed       items/hour
+ * @param {number} statedStock
+ * @returns {'High'|'Medium'|'Low'}
  */
 export function calculateConfidence(lastUpdatedHours, storeCancelRate, salesSpeed, statedStock) {
-  // Guard: explicit zero stock
   if (statedStock <= 0) return 'Low';
 
   const expectedSales = lastUpdatedHours * salesSpeed;
-  const remaining = statedStock - expectedSales;
-
-  // Guard: stock exhausted by predicted sales
+  const remaining     = statedStock - expectedSales;
   if (remaining <= 0) return 'Low';
 
   const risk =
-    (storeCancelRate / 0.5) * 0.4 +
-    Math.min(lastUpdatedHours / 72, 1) * 0.4 +
-    Math.min(expectedSales / statedStock, 1) * 0.2;
+    (storeCancelRate / CANCEL_RATE_NORMALISE) * WEIGHT_CANCEL_RATE +
+    Math.min(lastUpdatedHours / MAX_STALENESS_HOURS, 1) * WEIGHT_STALENESS +
+    Math.min(expectedSales / statedStock, 1) * WEIGHT_VELOCITY;
 
-  if (risk > 0.6) return 'Low';
-  if (risk > 0.3) return 'Medium';
+  if (risk > RISK_LOW_THRESHOLD)    return 'Low';
+  if (risk > RISK_MEDIUM_THRESHOLD) return 'Medium';
   return 'High';
 }
 
 /**
  * Derive a 0–5 star customer rating from a store's trust score.
- * Adds a small deterministic variance per store to look realistic.
- * @param {number} trustScore - 0–100
- * @param {number} storeId    - Used for deterministic variance
+ * @param {number} trustScore  0–100
+ * @param {number} storeId     used for deterministic variance
  * @returns {string} e.g. "4.3"
  */
 export function deriveRating(trustScore, storeId) {
-  const base = (trustScore / 100) * 5;
-  const variance = ((storeId % 7) - 3) * 0.05; // ±0.15 max
-  return Math.min(5, Math.max(1, base + variance)).toFixed(1);
+  const base     = (trustScore / 100) * MAX_RATING;
+  const variance = ((storeId % RATING_VARIANCE_MODULO) - 3) * RATING_VARIANCE_SCALE;
+  return Math.min(MAX_RATING, Math.max(MIN_RATING, base + variance)).toFixed(1);
 }
 
 /**
- * Sanitize user-provided search text to prevent XSS.
+ * Sanitize user-provided text to prevent XSS.
  * @param {string} input
  * @returns {string}
  */
@@ -53,5 +62,5 @@ export function sanitizeInput(input) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
-    .slice(0, 100); // cap at 100 chars
+    .slice(0, MAX_SEARCH_LENGTH);
 }

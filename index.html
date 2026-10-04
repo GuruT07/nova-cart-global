@@ -3,6 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Security: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self' 'unsafe-inline';
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               font-src 'self' https://fonts.gstatic.com;
+               img-src 'self' data: https:;
+               connect-src 'self';
+               frame-ancestors 'none';" />
+
+    <!-- Security: prevent MIME-type sniffing -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+
+    <!-- Security: prevent clickjacking -->
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+
+    <!-- SEO / Social meta -->
+    <meta name="description" content="Nova Cart Global — AI-powered inventory rescue engine and marketplace simulator for quick-commerce." />
+    <meta property="og:title" content="Nova Cart Global" />
+    <meta property="og:description" content="AI Rescue Engine Simulator for q-commerce inventory accuracy." />
+    <meta name="theme-color" content="#09090b" />
+
     <title>Nova Cart Global</title>
   </head>
   <body>
